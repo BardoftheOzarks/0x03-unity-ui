@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -12,6 +13,12 @@ public class PlayerController : MonoBehaviour
     public int health = 5;
     // Variable for player score
     private int score = 0;
+    // Variable for score text
+    public Text scoreText;
+    // Variable for player health text
+    public Text healthText;
+    public Image winLoseBG;
+    public Text winLoseText;
 
     // Update is called once per frame
     void FixedUpdate()
@@ -37,6 +44,45 @@ public class PlayerController : MonoBehaviour
             player.AddForce(speed * Time.deltaTime, 0, 0);
         }
     }
+
+    // Method for updated score display on screen
+    void SetScoreText()
+    {
+        scoreText.text = $"Score: {score}";
+    }
+
+    // Method for updating Health display
+    void SetHealthText()
+    {
+        healthText.text = $"Health: {health}";
+    }
+
+    // Method for winning
+    void Win()
+    {
+        winLoseText.text = "You Win!";
+        winLoseText.color = Color.black;
+        winLoseBG.color = Color.green;
+        winLoseBG.gameObject.SetActive(true);
+        StartCoroutine(LoadScene(3));
+    }
+
+    // Method for losing
+    void Lose()
+    {
+        winLoseText.text = "Game Over!";
+        winLoseText.color = Color.white;
+        winLoseBG.color = Color.red;
+        winLoseBG.gameObject.SetActive(true);
+        StartCoroutine(LoadScene(3));
+    }
+
+    IEnumerator LoadScene(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
     // Method for collecting coin objects
     void OnTriggerEnter(Collider other)
     {
@@ -44,24 +90,32 @@ public class PlayerController : MonoBehaviour
         {
             Destroy(other.gameObject);
             score++;
-            Debug.Log($"Score: {score}");
+            SetScoreText();
+            // Debug.Log($"Score: {score}");
         }
         if (other.tag == "Trap")
         {
             health--;
-            Debug.Log($"Health: {health}");
+            SetHealthText();
+            // Debug.Log($"Health: {health}");
         }
         if (other.tag == "Goal")
         {
-            Debug.Log("You win!");
+            Win();
+            // Debug.Log("You win!");
         }
     }
     void Update()
     {
         if (health == 0)
         {
-            Debug.Log("Game Over!");
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            Lose();
+            //Debug.Log("Game Over!");
+            //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+        if (Input.GetKey(KeyCode.Escape))
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1);
         }
     }
 }
